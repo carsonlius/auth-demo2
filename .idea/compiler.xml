@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Annotation profile for auth-demo2" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$PROJECT_DIR$/../../../config/repo/org/springframework/boot/spring-boot-configuration-processor/2.7.13/spring-boot-configuration-processor-2.7.13.jar" />
+          <entry name="$PROJECT_DIR$/../../../config/repo/org/projectlombok/lombok/1.18.28/lombok-1.18.28.jar" />
+          <entry name="$PROJECT_DIR$/../../../config/repo/org/mapstruct/mapstruct-processor/1.5.5.Final/mapstruct-processor-1.5.5.Final.jar" />
+          <entry name="$PROJECT_DIR$/../../../config/repo/org/mapstruct/mapstruct/1.5.5.Final/mapstruct-1.5.5.Final.jar" />
+        </processorPath>
+        <module name="demo-common" />
+        <module name="demo-server" />
+        <module name="demo-module-system-api" />
+        <module name="demo-module-system-biz" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="yudao-module-system-biz" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
