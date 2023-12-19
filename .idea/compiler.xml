@@ -13,10 +13,13 @@
           <entry name="$PROJECT_DIR$/../../../config/repo/org/mapstruct/mapstruct-processor/1.5.5.Final/mapstruct-processor-1.5.5.Final.jar" />
           <entry name="$PROJECT_DIR$/../../../config/repo/org/mapstruct/mapstruct/1.5.5.Final/mapstruct-1.5.5.Final.jar" />
         </processorPath>
-        <module name="demo-common" />
         <module name="demo-server" />
-        <module name="demo-module-system-api" />
         <module name="demo-module-system-biz" />
+        <module name="demo-common" />
+        <module name="demo-spring-boot-starter-security" />
+        <module name="demo-module-system-api" />
+        <module name="demo-spring-boot-starter-web" />
+        <module name="demo-spring-boot-starter-mybatis" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
