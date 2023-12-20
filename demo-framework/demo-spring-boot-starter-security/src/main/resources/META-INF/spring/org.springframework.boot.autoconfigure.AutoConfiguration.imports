@@ -1,1 +1,2 @@
 com.carsonlius.framework.security.config.DemoSecurityAutoConfiguration
+com.carsonlius.framework.security.config.DemoWebSecurityConfigurerAdapter

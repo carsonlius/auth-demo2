@@ -11,7 +11,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
  * @company
  * @description
  */
-@SpringBootApplication(scanBasePackages = {"com.carsonlius"}, exclude ={SecurityAutoConfiguration.class})
+@SpringBootApplication(scanBasePackages = {"com.carsonlius"})
 public class DemoApplication {
     public static void main(String[] args) {
         SpringApplication.run(DemoApplication.class,args);
