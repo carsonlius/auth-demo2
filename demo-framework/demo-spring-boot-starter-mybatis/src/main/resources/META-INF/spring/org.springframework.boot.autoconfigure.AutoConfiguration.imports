@@ -1,0 +1,2 @@
+com.carsonlius.framework.mybatis.config.YudaoMybatisAutoConfiguration
+com.carsonlius.framework.datasource.config.YudaoDataSourceAutoConfiguration
