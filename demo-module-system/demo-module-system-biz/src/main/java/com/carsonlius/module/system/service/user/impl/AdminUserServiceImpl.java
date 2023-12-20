@@ -5,6 +5,7 @@ import com.carsonlius.module.system.dal.mysql.user.AdminUserMapper;
 import com.carsonlius.module.system.service.user.AdminUserService;
 import lombok.extern.slf4j.Slf4j;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -24,8 +25,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Resource
     private AdminUserMapper userMapper;
 
-//    @Resource
-//    private PasswordEncoder passwordEncoder;
+    @Resource
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public AdminUserDO getUserByUsername(String username) {
@@ -34,7 +35,6 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public boolean isPasswordMatch(String rawPassword, String encodedPassword) {
-//        return passwordEncoder.matches(rawPassword, encodedPassword);
-        return true;
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 }

@@ -2,6 +2,7 @@ package com.carsonlius.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
 /**
  * @version V1.0
@@ -10,7 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @company
  * @description
  */
-@SpringBootApplication(scanBasePackages = {"com.carsonlius"})
+@SpringBootApplication(scanBasePackages = {"com.carsonlius"}, exclude ={SecurityAutoConfiguration.class})
 public class DemoApplication {
     public static void main(String[] args) {
         SpringApplication.run(DemoApplication.class,args);
