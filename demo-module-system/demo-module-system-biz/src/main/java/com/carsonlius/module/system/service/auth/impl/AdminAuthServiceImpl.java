@@ -1,17 +1,23 @@
 package com.carsonlius.module.system.service.auth.impl;
 
 import com.carsonlius.framework.common.enums.CommonStatusEnum;
+import com.carsonlius.framework.common.enums.UserTypeEnum;
 import com.carsonlius.framework.common.exception.util.ServiceExceptionUtil;
 import com.carsonlius.module.system.controller.admin.auth.vo.AuthLoginReqVO;
 import com.carsonlius.module.system.controller.admin.auth.vo.AuthLoginRespVO;
+import com.carsonlius.module.system.convert.auth.AuthConvert;
+import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.carsonlius.module.system.dal.dataobject.user.AdminUserDO;
 import com.carsonlius.module.system.enums.ErrorCodeConstants;
+import com.carsonlius.module.system.enums.logger.LoginLogTypeEnum;
+import com.carsonlius.module.system.enums.oauth2.OAuth2ClientConstants;
 import com.carsonlius.module.system.service.auth.AdminAuthService;
+import com.carsonlius.module.system.service.oauth2.OAuth2TokenService;
 import com.carsonlius.module.system.service.user.AdminUserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 
 /**
  * @version V1.0
@@ -24,8 +30,11 @@ import javax.annotation.Resource;
 @Slf4j
 public class AdminAuthServiceImpl implements AdminAuthService {
 
-    @Resource
+    @Autowired
     private AdminUserService userService;
+
+    @Autowired
+    private OAuth2TokenService oauth2TokenService;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -66,13 +75,29 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
         // todo 创建token, 记录日志
 
-
-
-        return null;
+        // 创建访问令牌
+        return createTokenAfterLoginSuccess(user.getId(), user.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     @Override
     public void logout(String token, Integer logType) {
 
+    }
+
+    /**
+     * 创建访问令牌
+     */
+    public AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, String username, LoginLogTypeEnum logType) {
+        // todo 创建访问日志
+
+        //  生成token
+        OAuth2AccessTokenDO token = oauth2TokenService.createAccessToken(userId, getUserType().getValue(), OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
+
+        //  构建响应
+        return AuthConvert.INSTANCE.convert(token);
+    }
+
+    private UserTypeEnum getUserType() {
+        return UserTypeEnum.ADMIN;
     }
 }
