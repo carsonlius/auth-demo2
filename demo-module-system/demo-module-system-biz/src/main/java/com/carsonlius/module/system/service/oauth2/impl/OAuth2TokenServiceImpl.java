@@ -1,6 +1,7 @@
 package com.carsonlius.module.system.service.oauth2.impl;
 
 import cn.hutool.core.util.IdUtil;
+import com.carsonlius.framework.common.exception.ServiceException;
 import com.carsonlius.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.carsonlius.framework.common.exception.util.ServiceExceptionUtil;
 import com.carsonlius.framework.common.util.date.DateUtils;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.carsonlius.module.system.enums.ErrorCodeConstants.AUTH_TOKEN_EXPIRED;
 
 /**
  * @version V1.0
@@ -58,12 +61,12 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
 
         // 校验访问令牌不存在
         if (tokenDO == null) {
-            throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.UNAUTHORIZED.getCode(), "访问令牌不存在");
+            throw  ServiceExceptionUtil.exception(ErrorCodeConstants.AUTH_TOKEN_NOT_EXISTS);
         }
 
         //  校验访问另外过期
         if (DateUtils.isExpired(tokenDO.getExpiresTime())) {
-            throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.UNAUTHORIZED.getCode(), "访问令牌已过期");
+            throw  ServiceExceptionUtil.exception(ErrorCodeConstants.AUTH_TOKEN_EXPIRED);
         }
 
         return tokenDO;
