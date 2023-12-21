@@ -1,5 +1,6 @@
 package com.carsonlius.framework.security.config;
 
+import com.carsonlius.framework.security.core.filter.TokenAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +13,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import javax.annotation.Resource;
 
 /**
  * @version V1.0
@@ -29,6 +33,9 @@ public class DemoWebSecurityConfigurerAdapter {
 
     @Autowired
     private AccessDeniedHandler accessDeniedHandler;
+
+    @Resource
+    private TokenAuthenticationFilter tokenAuthenticationFilter;
 
     /**
      * 由于 Spring Security 创建 AuthenticationManager 对象时，没声明 @Bean 注解，导致无法被注入
@@ -74,6 +81,7 @@ public class DemoWebSecurityConfigurerAdapter {
                 .antMatchers("/system/auth/login").permitAll()
                 .and().authorizeRequests().anyRequest().authenticated(); // 其他请求必须认证
 
+        httpSecurity.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }

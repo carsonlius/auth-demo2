@@ -56,7 +56,11 @@
             <groupId>com.carsonlius</groupId>
             <artifactId>demo-spring-boot-starter-web</artifactId>
             <version>${revision}</version>
-            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.carsonlius</groupId>
+            <artifactId>demo-module-system-api</artifactId>
+            <version>${revision}</version>
         </dependency>
     </dependencies>
 

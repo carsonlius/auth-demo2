@@ -1,11 +1,15 @@
 package com.carsonlius.module.system.service.oauth2.impl;
 
 import cn.hutool.core.util.IdUtil;
+import com.carsonlius.framework.common.exception.enums.GlobalErrorCodeConstants;
+import com.carsonlius.framework.common.exception.util.ServiceExceptionUtil;
+import com.carsonlius.framework.common.util.date.DateUtils;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2RefreshTokenDO;
 import com.carsonlius.module.system.dal.mysql.oauth2.OAuth2AccessTokenMapper;
 import com.carsonlius.module.system.dal.mysql.oauth2.OAuth2RefreshTokenMapper;
+import com.carsonlius.module.system.enums.ErrorCodeConstants;
 import com.carsonlius.module.system.service.oauth2.OAuth2ClientService;
 import com.carsonlius.module.system.service.oauth2.OAuth2TokenService;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -46,6 +50,28 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
 
         //  获取token
         return createOAuth2AccessToken(client, refreshToken);
+    }
+
+    @Override
+    public OAuth2AccessTokenDO checkAccessToken(String accessToken) {
+        OAuth2AccessTokenDO tokenDO = getAccessToken(accessToken);
+
+        // 校验访问令牌不存在
+        if (tokenDO == null) {
+            throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.UNAUTHORIZED.getCode(), "访问令牌不存在");
+        }
+
+        //  校验访问另外过期
+        if (DateUtils.isExpired(tokenDO.getExpiresTime())) {
+            throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.UNAUTHORIZED.getCode(), "访问令牌已过期");
+        }
+
+        return tokenDO;
+    }
+
+    @Override
+    public OAuth2AccessTokenDO getAccessToken(String accessToken) {
+        return tokenMapper.selectByAccessToken(accessToken);
     }
 
     /**
