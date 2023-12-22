@@ -92,7 +92,6 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                     .scopes(tokenCheckRespDTO.getScopes())
                     .build();
         } catch (ServiceException e) {
-
             log.error("token {} userType {} token认证异常 {}", token, userType, e.getMessage());
             throw e;
         }

@@ -3,6 +3,8 @@ package com.carsonlius.server.controller.auth;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.security.PermitAll;
+
 /**
  * @version V1.0
  * @author: carsonlius
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     @GetMapping("/test")
+    @PermitAll
     public Object test(){
         return "hello world";
     }

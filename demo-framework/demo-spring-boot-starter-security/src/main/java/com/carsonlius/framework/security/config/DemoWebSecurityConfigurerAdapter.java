@@ -1,8 +1,12 @@
 package com.carsonlius.framework.security.config;
 
 import com.carsonlius.framework.security.core.filter.TokenAuthenticationFilter;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,8 +18,15 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import javax.annotation.Resource;
+import javax.annotation.security.PermitAll;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @version V1.0
@@ -26,6 +37,7 @@ import javax.annotation.Resource;
  */
 @AutoConfiguration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@Slf4j
 public class DemoWebSecurityConfigurerAdapter {
 
     @Autowired
@@ -36,6 +48,9 @@ public class DemoWebSecurityConfigurerAdapter {
 
     @Resource
     private TokenAuthenticationFilter tokenAuthenticationFilter;
+
+    @Resource
+    private ApplicationContext applicationContext;
 
     /**
      * 由于 Spring Security 创建 AuthenticationManager 对象时，没声明 @Bean 注解，导致无法被注入
@@ -74,16 +89,64 @@ public class DemoWebSecurityConfigurerAdapter {
                 .accessDeniedHandler(accessDeniedHandler); // 身份已经认证（登录）,但是没有权限的情况的响应
 
 
+        Multimap<HttpMethod, String> permitAllUrlMap = getUrlsFormPermitAllAnnotation();
         // 设置具体请求的权限
         httpSecurity.authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/*.html", "/**/*.html", "/**/*.css", "/**/*.js").permitAll() // 静态资源无需认证
                 .antMatchers("/websocket/message").permitAll() // websocket无需认证
-                .antMatchers("/system/auth/login").permitAll()
+                .antMatchers(HttpMethod.GET, permitAllUrlMap.get(HttpMethod.GET).toArray(new String[0])).permitAll()
+                .antMatchers(HttpMethod.POST, permitAllUrlMap.get(HttpMethod.POST).toArray(new String[0])).permitAll()
+                .antMatchers(HttpMethod.PUT, permitAllUrlMap.get(HttpMethod.PUT).toArray(new String[0])).permitAll()
+                .antMatchers(HttpMethod.DELETE, permitAllUrlMap.get(HttpMethod.DELETE).toArray(new String[0])).permitAll()
                 .and().authorizeRequests().anyRequest().authenticated(); // 其他请求必须认证
 
         httpSecurity.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }
+
+
+    /**
+     * 获取被PermitAll注解修饰的url地址
+     * */
+    private Multimap<HttpMethod, String> getUrlsFormPermitAllAnnotation() {
+        Multimap<HttpMethod, String> methodMap = HashMultimap.create();
+
+        RequestMappingHandlerMapping requestMappingHandlerMapping = (RequestMappingHandlerMapping) applicationContext.getBean("requestMappingHandlerMapping");
+        for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : requestMappingHandlerMapping.getHandlerMethods().entrySet()) {
+            HandlerMethod method = entry.getValue();
+            if (!method.hasMethodAnnotation(PermitAll.class)) {
+                continue;
+            }
+            if (entry.getKey().getPatternsCondition() == null) {
+                continue;
+            }
+
+            Set<String> url = entry.getKey().getPatternsCondition().getPatterns();
+
+            for (RequestMethod requestMethod : entry.getKey().getMethodsCondition().getMethods()) {
+                switch (requestMethod) {
+                    case GET:
+                        methodMap.putAll(HttpMethod.GET, url);
+                        break;
+                    case POST:
+                        methodMap.putAll(HttpMethod.POST, url);
+                        break;
+                    case PUT:
+                        methodMap.putAll(HttpMethod.PUT, url);
+                        break;
+                    case DELETE:
+                        methodMap.putAll(HttpMethod.DELETE, url);
+                        break;
+                    default:
+                }
+            }
+        }
+        log.info("PermitAll注解修饰的urls {}", methodMap);
+
+        return methodMap;
+    }
+
+
 
 }
