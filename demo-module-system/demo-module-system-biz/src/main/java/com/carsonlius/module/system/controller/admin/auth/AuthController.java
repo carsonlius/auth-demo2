@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -41,10 +42,11 @@ public class AuthController {
         return "hello carsonlius!";
     }
 
-    @GetMapping("hello2")
+    @GetMapping("checkPermission")
     @PermitAll
+    @PreAuthorize("@customPermission.hasPermission('system:user:create')")
     public Object sayHello2() {
-        return "hello2 carsonlius!";
+        return "校验权限通过";
     }
 
     @PostMapping("/login")

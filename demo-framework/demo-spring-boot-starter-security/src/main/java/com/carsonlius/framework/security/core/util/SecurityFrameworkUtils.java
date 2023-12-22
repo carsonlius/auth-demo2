@@ -6,6 +6,7 @@ import com.carsonlius.framework.common.enums.UserTypeEnum;
 import com.carsonlius.framework.security.core.entity.LoginUser;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
@@ -69,14 +70,14 @@ public class SecurityFrameworkUtils {
          * SecurityContextHolder.getContext().setAuthentication(authentication) 是 Spring Security 中用于设置当前用户认证信息的方法。
          * 它的作用是将给定的 Authentication 对象设置为当前线程的安全上下文中，表示当前用户已经通过身份验证。
          * */
-        Authentication authentication = buildAuthentication(loginUser,request);
+        Authentication authentication = buildAuthentication(loginUser, request);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
     }
 
     /**
      * 构建Authentication
-     * */
+     */
     private static Authentication buildAuthentication(LoginUser loginUser, HttpServletRequest request) {
         /**
          * 创建 UsernamePasswordAuthenticationToken 对象
@@ -101,5 +102,34 @@ public class SecurityFrameworkUtils {
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         return authentication;
+    }
+
+    /**
+     * 获取登录用户ID
+     */
+    public static Long getLoginUserId() {
+        LoginUser loginUser = getLoginUser();
+        return loginUser == null ? null : loginUser.getId();
+    }
+
+    /**
+     * 获取登录用户
+     */
+    public static LoginUser getLoginUser() {
+        Authentication authentication = getAuthentication();
+        if (authentication == null) {
+            return null;
+        }
+
+        return authentication.getPrincipal() instanceof LoginUser ? (LoginUser) authentication.getPrincipal() : null;
+    }
+
+    /**
+     * 获得当前认证信息
+     */
+    public static Authentication getAuthentication() {
+        SecurityContext context = SecurityContextHolder.getContext();
+
+        return context != null ? context.getAuthentication() : null;
     }
 }
