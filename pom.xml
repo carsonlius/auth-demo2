@@ -81,6 +81,8 @@
         <jimureport.version>1.5.8</jimureport.version>
         <xercesImpl.version>2.12.2</xercesImpl.version>
         <weixin-java.version>4.5.0</weixin-java.version>
+        <knife4j-spring.version>1.9.6</knife4j-spring.version>
+        <knife4j-spring-ui.version>1.9.6</knife4j-spring-ui.version>
     </properties>
 
     <dependencyManagement>
@@ -553,6 +555,18 @@
                 <artifactId>spring-boot-starter-websocket</artifactId>
                 <version>${spring.boot.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-spring</artifactId>
+                <version>${knife4j-spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-spring-ui</artifactId>
+                <version>${knife4j-spring-ui.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
     <build>
