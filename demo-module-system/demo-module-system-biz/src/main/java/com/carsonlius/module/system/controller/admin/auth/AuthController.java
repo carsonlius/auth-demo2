@@ -39,6 +39,7 @@ public class AuthController {
     @Resource
     private AdminAuthService authService;
 
+    @Operation(summary = "验证token认证是否生效")
     @GetMapping("hello")
     public Object sayHello() {
         return "hello carsonlius!";
@@ -47,6 +48,7 @@ public class AuthController {
     @GetMapping("checkPermission")
     @PermitAll
     @PreAuthorize("@customPermission.hasPermission('system:user:create')")
+    @Operation(summary = "权限验证")
     public Object sayHello2() {
         return "校验权限通过";
     }
