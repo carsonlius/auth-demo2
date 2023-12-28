@@ -18,7 +18,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * @author: carsonlius
  * @date: 2023/12/28 10:07
  * @company
- * @description
+ * @description swagger配置
  */
 @AutoConfiguration
 @ConditionalOnProperty(prefix = "springdoc.api-docs", name = "enabled", havingValue = "true", matchIfMissing = true)
@@ -26,14 +26,35 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class DemoSwaggerAutoConfiguration {
 
+    /**
+     * 设置system分组
+     * */
     @Bean
-    public Docket createRestApi(SwaggerProperties properties) {
+    public Docket createSystemApi(SwaggerProperties properties) {
         return new Docket(DocumentationType.SWAGGER_2)
+                .groupName("system")
                 // 设置api信息
                 .apiInfo(apiInfo(properties))
                 // 扫描；controller包路径, 获取api接口
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.carsonlius"))
+                .apis(RequestHandlerSelectors.basePackage("com.carsonlius.module.system"))
+                .paths(PathSelectors.any())
+                // 构建Docket对象
+                .build();
+    }
+
+    /**
+     * 设置system分组
+     * */
+    @Bean
+    public Docket createWebApi(SwaggerProperties properties) {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .groupName("web")
+                // 设置api信息
+                .apiInfo(apiInfo(properties))
+                // 扫描；controller包路径, 获取api接口
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("com.carsonlius.framework.web"))
                 .paths(PathSelectors.any())
                 // 构建Docket对象
                 .build();
