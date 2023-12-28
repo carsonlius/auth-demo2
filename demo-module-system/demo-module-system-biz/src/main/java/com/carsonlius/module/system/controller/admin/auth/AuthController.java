@@ -6,6 +6,8 @@ import com.carsonlius.module.system.controller.admin.auth.vo.AuthLoginRespVO;
 import com.carsonlius.module.system.service.auth.AdminAuthService;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -33,13 +35,13 @@ import java.util.Set;
 @RestController
 @RequestMapping("/system/auth")
 @Slf4j
-@Tag(name = "管理后台 - 认证")
+@Api(tags = "管理后台 - 认证")
 public class AuthController {
 
     @Resource
     private AdminAuthService authService;
 
-    @Operation(summary = "验证token认证是否生效")
+    @ApiOperation("验证token认证是否生效")
     @GetMapping("hello")
     public Object sayHello() {
         return "hello carsonlius!";
@@ -48,14 +50,14 @@ public class AuthController {
     @GetMapping("checkPermission")
     @PermitAll
     @PreAuthorize("@customPermission.hasPermission('system:user:create')")
-    @Operation(summary = "权限验证")
+    @ApiOperation("权限验证")
     public Object sayHello2() {
         return "校验权限通过";
     }
 
     @PostMapping("/login")
     @PermitAll
-    @Operation(summary = "使用账号密码登录")
+    @ApiOperation("使用账号密码登录")
     public CommonResult<AuthLoginRespVO> login(@RequestBody @Valid AuthLoginReqVO reqVO) {
         return CommonResult.success(authService.login(reqVO));
     }

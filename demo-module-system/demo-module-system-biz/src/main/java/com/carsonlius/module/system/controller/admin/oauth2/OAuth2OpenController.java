@@ -9,10 +9,13 @@ import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.carsonlius.module.system.service.oauth2.OAuth2ApproveService;
 import com.carsonlius.module.system.service.oauth2.OAuth2ClientService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -23,7 +26,9 @@ import java.util.List;
  * @company
  * @description 提供给客户端的oauth2认证
  */
+@RestController
 @RequestMapping("/system/oauth2")
+@Api(tags = "管理后台 - oauth2.0认证")
 public class OAuth2OpenController {
 
     @Autowired
@@ -37,6 +42,7 @@ public class OAuth2OpenController {
      * 获取认证信息, 比如: client名称,图标, scope列表
      */
     @GetMapping("/authorize")
+    @ApiOperation(value = "获得授权信息", notes = "适合 code 授权码模式，或者 implicit 简化模式")
     public CommonResult<OAuth2OpenAuthorizeInfoRespVO> authorize(@RequestParam("clientId") String clientId) {
         // 校验用户已登录, spring security已实现这个要求
 
