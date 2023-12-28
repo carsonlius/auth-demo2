@@ -94,7 +94,8 @@ public class DemoWebSecurityConfigurerAdapter {
         httpSecurity.authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/*.html", "/**/*.html", "/**/*.css", "/**/*.js").permitAll() // 静态资源无需认证
                 .antMatchers("/websocket/message").permitAll() // websocket无需认证
-                .antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+//                .antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .antMatchers("/swagger-ui.html", "/webjars/**", "/v2/api-docs", "/swagger-resources/**").permitAll()
                 // 放行 Druid 监控的相关 URI
                 .antMatchers("/druid/**").permitAll()
                 .antMatchers(HttpMethod.GET, permitAllUrlMap.get(RequestMethod.GET).toArray(new String[0])).permitAll()

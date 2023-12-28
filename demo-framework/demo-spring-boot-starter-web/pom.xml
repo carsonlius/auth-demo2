@@ -34,13 +34,27 @@
             <optional>true</optional>
         </dependency>
 
+<!--        <dependency>-->
+<!--            <groupId>com.github.xiaoymin</groupId>-->
+<!--            <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.springdoc</groupId>-->
+<!--            <artifactId>springdoc-openapi-ui</artifactId>-->
+<!--        </dependency>-->
+
+        <!-- 1. swagger-bootstrap-ui 目前改名为 knife4j -->
+        <!-- 2. 实现 swagger-bootstrap-ui 的自动化配置  -->
+        <!-- 3. 因为 knife4j-spring 已经引入 Swagger 依赖，所以无需重复引入 -->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
+            <artifactId>knife4j-spring</artifactId>
+            <version>1.9.6</version>
         </dependency>
         <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-spring-ui</artifactId>
+            <version>1.9.6</version>
         </dependency>
 
         <dependency>
