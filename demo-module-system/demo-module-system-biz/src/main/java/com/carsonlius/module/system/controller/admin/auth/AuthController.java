@@ -7,6 +7,7 @@ import com.carsonlius.module.system.service.auth.AdminAuthService;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpMethod;
@@ -32,6 +33,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/system/auth")
 @Slf4j
+@Tag(name = "管理后台 - 认证")
 public class AuthController {
 
     @Resource
