@@ -89,7 +89,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
      */
     public AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, String username, LoginLogTypeEnum logType) {
         // todo 创建访问日志
-
+        log.info("尊敬的客户 {} 登录成功 ", username);
         //  生成token
         OAuth2AccessTokenDO token = oauth2TokenService.createAccessToken(userId, getUserType().getValue(), OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
