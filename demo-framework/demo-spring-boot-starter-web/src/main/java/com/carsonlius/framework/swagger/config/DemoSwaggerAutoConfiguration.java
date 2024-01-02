@@ -13,6 +13,8 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.util.Collections;
+
 /**
  * @version V1.0
  * @author: carsonlius
@@ -40,7 +42,8 @@ public class DemoSwaggerAutoConfiguration {
                 .apis(RequestHandlerSelectors.basePackage("com.carsonlius.module.system"))
                 .paths(PathSelectors.any())
                 // 构建Docket对象
-                .build();
+                .build()
+                .securitySchemes(Collections.singletonList(apiKey()));
     }
 
     /**
@@ -57,7 +60,16 @@ public class DemoSwaggerAutoConfiguration {
                 .apis(RequestHandlerSelectors.basePackage("com.carsonlius.framework.web"))
                 .paths(PathSelectors.any())
                 // 构建Docket对象
-                .build();
+                .build()
+                .securitySchemes(Collections.singletonList(apiKey()));
+    }
+
+
+    /**
+     * 设置请求头
+     * */
+    private springfox.documentation.service.ApiKey apiKey() {
+        return new springfox.documentation.service.ApiKey("authorization", "Authorization", "header");
     }
 
     /**

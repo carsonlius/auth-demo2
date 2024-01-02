@@ -37,7 +37,6 @@ public class AuthController {
     }
 
     @GetMapping("checkPermission")
-    @PermitAll
     @PreAuthorize("@customPermission.hasPermission('system:user:create')")
     @ApiOperation("权限验证")
     public Object sayHello2() {
