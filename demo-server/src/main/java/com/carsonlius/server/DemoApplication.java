@@ -28,7 +28,7 @@ public class DemoApplication {
                         "Application '{}' is running! Access URLs:\n\t" +
                         "Local: \t\thttp://localhost:{}\n\t" +
                         "Doc: \thttp://{}:{}/doc.html\n\t" +
-                        "druid: \thttp://{}:{}/druid\n\t" +
+                        "druid: \thttp://{}:{}/druid\n" +
                         "----------------------------------------------------------",
                 env.getProperty("spring.application.name"),
                 env.getProperty("server.port"),

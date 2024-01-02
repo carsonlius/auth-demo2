@@ -3,6 +3,7 @@ package com.carsonlius.module.system.service.oauth2;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @version V1.0
@@ -22,5 +23,15 @@ public interface OAuth2ApproveService {
      * @return 是否授权通过
      */
     List<OAuth2ApproveDO> getApproveList(Long userId, Integer userType,String clientId);
+
+    /**
+     * 用户发起授权申请时，基于scopes的选项 计算最总是否通过
+     * @param userId 用户编号
+     * @param userType 用户类型
+     * @param clientId 客户端编号
+     * @param requestedScopes 授权范围
+     * @return 是否授权通过
+     * */
+    boolean updateAfterApproval(Long userId, Integer userType, String clientId, Map<String, Boolean> requestedScopes);
 
 }
