@@ -1,7 +1,10 @@
 package com.carsonlius.module.system.service.oauth2.impl;
 
+import com.carsonlius.framework.common.util.date.DateUtils;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
+import com.carsonlius.module.system.dal.mysql.oauth2.OAuth2ApproveMapper;
 import com.carsonlius.module.system.service.oauth2.OAuth2ApproveService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,9 +18,14 @@ import java.util.List;
  */
 @Service
 public class OAuth2ApproveServiceImpl implements OAuth2ApproveService {
+
+    @Autowired
+    private OAuth2ApproveMapper oAuth2ApproveMapper;
+
     @Override
     public List<OAuth2ApproveDO> getApproveList(Long userId, Integer userType, String clientId) {
-        // todo 实现
-        return null;
+        List<OAuth2ApproveDO> approvalList = oAuth2ApproveMapper.selectListByUserIdAndUserTypeAndClientId(userId, userType, clientId);
+        approvalList.removeIf(approval -> DateUtils.isExpired(approval.getExpiresTime()));
+        return approvalList;
     }
 }
