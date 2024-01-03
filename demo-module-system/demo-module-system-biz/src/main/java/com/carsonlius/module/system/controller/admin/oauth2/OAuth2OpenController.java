@@ -95,7 +95,7 @@ public class OAuth2OpenController {
             @ApiImplicitParam(name="response_type", required=true, value="响应类型", example = "code"),
             @ApiImplicitParam(name="client_id", required=true, value="客户端编号", example = "yudao-sso-demo-by-code"),
             @ApiImplicitParam(name="scope", required=false, value="授权范围", example = "{\"user.read\":true,\"user.write\":false}"),
-            @ApiImplicitParam(name="redirect_uri", required=true, value="重定向 URI", example = "http://localhost:18080"),
+            @ApiImplicitParam(name="redirect_uri", required=true, value="重定向 URI", example = "http://127.0.0.1:18080/callback.html"),
             @ApiImplicitParam(name="auto_approve", required=true, value="是否自动授权", example = "false"),
             @ApiImplicitParam(name="state", required=true, value="自定义标识,会远洋返回", example = "clientID1"),
     })

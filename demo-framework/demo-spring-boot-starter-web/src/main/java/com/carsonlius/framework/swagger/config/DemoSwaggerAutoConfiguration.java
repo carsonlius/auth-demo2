@@ -43,7 +43,8 @@ public class DemoSwaggerAutoConfiguration {
                 .paths(PathSelectors.any())
                 // 构建Docket对象
                 .build()
-                .securitySchemes(Collections.singletonList(apiKey()));
+//                .securitySchemes(Collections.singletonList(apiKey()))
+                ;
     }
 
     /**
@@ -61,7 +62,8 @@ public class DemoSwaggerAutoConfiguration {
                 .paths(PathSelectors.any())
                 // 构建Docket对象
                 .build()
-                .securitySchemes(Collections.singletonList(apiKey()));
+//                .securitySchemes(Collections.singletonList(apiKey()))
+                ;
     }
 
 

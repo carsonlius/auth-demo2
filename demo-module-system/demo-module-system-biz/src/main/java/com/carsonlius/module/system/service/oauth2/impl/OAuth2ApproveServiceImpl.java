@@ -67,12 +67,13 @@ public class OAuth2ApproveServiceImpl implements OAuth2ApproveService {
      * 保存筛选的权限以及没有选中的权限
      * */
     private void saveApprove(Long userId, Integer userType, String clientId, String scope, Boolean approved, LocalDateTime expireTime) {
-        OAuth2ApproveDO approveDO = new OAuth2ApproveDO().setUserId(userId)
+        OAuth2ApproveDO approveDO = (OAuth2ApproveDO) new OAuth2ApproveDO().setUserId(userId)
                 .setUserType(userType)
                 .setApproved(approved)
                 .setScope(scope)
                 .setClientId(clientId)
-                .setExpiresTime(expireTime);
+                .setExpiresTime(expireTime)
+                .setUpdateTime(LocalDateTime.now());
 
         // 先更新， 更新失败 则说明不存在，需要插入
         if (oAuth2ApproveMapper.update(approveDO) == 1) {
