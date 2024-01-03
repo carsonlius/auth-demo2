@@ -18,6 +18,8 @@ public class OAuth2AccessTokenCheckRespDTO implements Serializable {
     // 用户ID
     private Long userId;
 
+    private String username;
+
     // 租户类型
     private Integer userType;
 

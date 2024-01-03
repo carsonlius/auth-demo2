@@ -39,7 +39,7 @@ public class OAuth2ApproveServiceImpl implements OAuth2ApproveService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateAfterApproval(Long userId, Integer userType, String clientId, Map<String, Boolean> requestedScopes) {
         // requestedScopes为空，则表示没有权限范围要求, 此时返回true
         if (CollectionUtils.isEmpty(requestedScopes)) {
@@ -60,7 +60,7 @@ public class OAuth2ApproveServiceImpl implements OAuth2ApproveService {
             saveApprove(userId, userType, clientId, entry.getKey(), entry.getValue(), expireTime);
         }
 
-        return false;
+        return success;
     }
 
     /**

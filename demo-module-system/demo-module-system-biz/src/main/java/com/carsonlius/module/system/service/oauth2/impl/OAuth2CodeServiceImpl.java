@@ -35,10 +35,13 @@ public class OAuth2CodeServiceImpl implements OAuth2CodeService {
         OAuth2CodeDO codeDo = new OAuth2CodeDO().setUserId(userId)
                 .setCode(generateCode())
                 .setClientId(clientId)
+                .setUserType(userType)
                 .setScopes(scopes)
                 .setRedirectUri(redirectUri)
                 .setExpiresTime(LocalDateTime.now().plusSeconds(TIMEOUT))
                 .setState(state);
+        codeDo.setCreateTime(LocalDateTime.now());
+        codeDo.setUpdateTime(LocalDateTime.now());
 
         oAuth2CodeMapper.insert(codeDo);
         return codeDo;

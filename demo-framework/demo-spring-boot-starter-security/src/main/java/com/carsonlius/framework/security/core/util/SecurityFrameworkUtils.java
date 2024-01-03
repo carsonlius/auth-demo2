@@ -112,6 +112,7 @@ public class SecurityFrameworkUtils {
         return loginUser == null ? null : loginUser.getId();
     }
 
+
     /**
      * 获取登录用户
      */
