@@ -1,9 +1,15 @@
 package com.carsonlius.framework.common.util.http;
 
+import cn.hutool.core.codec.Base64;
+import cn.hutool.core.util.StrUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,12 +23,12 @@ public class HttpUtils {
 
     /**
      * 拼接 URL
-     *
+     * <p>
      * copy from Spring Security OAuth2 的 AuthorizationEndpoint 类的 append 方法
      *
-     * @param base 基础 URL
-     * @param query 查询参数
-     * @param keys query 的 key，对应的原本的 key 的映射。例如说 query 里有个 key 是 xx，实际它的 key 是 extra_xx，则通过 keys 里添加这个映射
+     * @param base     基础 URL
+     * @param query    查询参数
+     * @param keys     query 的 key，对应的原本的 key 的映射。例如说 query 里有个 key 是 xx，实际它的 key 是 extra_xx，则通过 keys 里添加这个映射
      * @param fragment URL 的 fragment，即拼接到 # 中
      * @return 拼接后的 URL
      */
@@ -75,5 +81,40 @@ public class HttpUtils {
             builder.query(encoded.getQuery());
         }
         return builder.build().toUriString();
+    }
+
+    /**
+     * 从header中获取clientId和secret
+     *
+     * */
+    public static List<String> obtainBasicAuthorization(HttpServletRequest request) {
+        List<String> clientIdAndSecret = new ArrayList<>();
+        String clientId = "";
+        String clientSecret = "";
+
+        // 从header中读取
+        String authorization = request.getHeader("Authorization");
+        authorization = StrUtil.subAfter(authorization, "Basic ", true);
+        if (StrUtil.isNotEmpty(authorization)) {
+            authorization = Base64.decodeStr(authorization);
+            clientId = StrUtil.subBefore(authorization, ":", false);
+            clientSecret = StrUtil.subAfter(authorization, ":", false);
+        } else {
+            clientId = request.getParameter("client_id");
+            clientSecret = request.getParameter("client_secret");
+        }
+
+        if (StrUtil.isNotEmpty(clientId) && StrUtil.isNotEmpty(clientSecret)){
+            clientIdAndSecret.add(clientId);
+            clientIdAndSecret.add(clientSecret);
+            return clientIdAndSecret;
+        }
+
+        return null;
+    }
+
+    public static void main(String[] args) {
+        String authorization = "Bearer 3543fdfea17d44b9a3fc19ade853a760";
+        System.out.println(StrUtil.subAfter(authorization, "Bearer ", true));
     }
 }

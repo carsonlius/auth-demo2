@@ -1,5 +1,7 @@
 package com.carsonlius.module.system.service.oauth2;
 
+import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
+
 import java.util.List;
 
 /**
@@ -30,4 +32,9 @@ public interface OAuth2GrantService {
      * @return 授权码
      * */
     String grantAuthorizationCodeForCode(Long userId, Integer userType, String clientId, List<String> scopes, String redirectUri, String state);
+
+    /**
+     * 授权码模式.第二阶段,获取accessToken访问令牌
+     * */
+    OAuth2AccessTokenDO grantAuthorizationCodeForAccessToken(String clientId, String code, String redirectUri, String state);
 }

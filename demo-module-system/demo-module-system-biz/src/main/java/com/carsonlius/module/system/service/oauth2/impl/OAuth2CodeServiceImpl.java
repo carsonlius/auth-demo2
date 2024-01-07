@@ -1,8 +1,12 @@
 package com.carsonlius.module.system.service.oauth2.impl;
 
 import cn.hutool.core.util.IdUtil;
+import com.carsonlius.framework.common.exception.enums.GlobalErrorCodeConstants;
+import com.carsonlius.framework.common.exception.util.ServiceExceptionUtil;
+import com.carsonlius.framework.common.util.date.DateUtils;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2CodeDO;
 import com.carsonlius.module.system.dal.mysql.oauth2.OAuth2CodeMapper;
+import com.carsonlius.module.system.enums.ErrorCodeConstants;
 import com.carsonlius.module.system.service.oauth2.OAuth2CodeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +49,27 @@ public class OAuth2CodeServiceImpl implements OAuth2CodeService {
 
         oAuth2CodeMapper.insert(codeDo);
         return codeDo;
+    }
+
+    @Override
+    public OAuth2CodeDO consumeAuthorizationCode(String code) {
+        //  查询code
+        OAuth2CodeDO codeDO =  oAuth2CodeMapper.selectByCode(code);
+
+        //  判空
+        if (codeDO == null) {
+            throw ServiceExceptionUtil.exception(ErrorCodeConstants.OAUTH2_CODE_NOT_EXISTS);
+        }
+
+        // 判断是否过期
+        if (DateUtils.isExpired(codeDO.getExpiresTime())) {
+            throw ServiceExceptionUtil.exception(ErrorCodeConstants.OAUTH2_CODE_EXPIRE);
+        }
+
+        // 删除
+        oAuth2CodeMapper.deleteById(codeDO.getId());
+
+        return codeDO;
     }
 
     private static String generateCode() {

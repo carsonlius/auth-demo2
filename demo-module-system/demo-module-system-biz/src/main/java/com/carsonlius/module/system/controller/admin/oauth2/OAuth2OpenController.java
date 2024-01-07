@@ -6,10 +6,13 @@ import com.carsonlius.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.carsonlius.framework.common.exception.util.ServiceExceptionUtil;
 import com.carsonlius.framework.common.pojo.CommonResult;
 import com.carsonlius.framework.common.util.collection.CollectionUtils;
+import com.carsonlius.framework.common.util.http.HttpUtils;
 import com.carsonlius.framework.common.util.json.JsonUtils;
 import com.carsonlius.framework.security.core.util.SecurityFrameworkUtils;
+import com.carsonlius.module.system.controller.admin.oauth2.vo.open.OAuth2OpenAccessTokenRespVO;
 import com.carsonlius.module.system.controller.admin.oauth2.vo.open.OAuth2OpenAuthorizeInfoRespVO;
 import com.carsonlius.module.system.convert.oauth2.OAuth2OpenConvert;
+import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.carsonlius.module.system.enums.oauth2.OAuth2GrantTypeEnum;
@@ -21,9 +24,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.PermitAll;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +56,84 @@ public class OAuth2OpenController {
 
     @Autowired
     private OAuth2GrantService oAuth2GrantService;
+
+    /**
+     * 对应 Spring Security OAuth 的 TokenEndpoint 类的 postAccessToken 方法
+     * 授权码 authorization_code 模式: code redirectUri + state
+     * 密码 password 模式: username + password + scope参数
+     * 刷新 refresh_token模式时： refreshToken参数
+     * 客户端 client_credentials 模式：scope 参数 不支持
+     * 简化 implicit 模式时：不支持
+     */
+//    @PostMapping("/token")
+//    @PermitAll
+//    @Operation(summary = "获得访问令牌", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【获取】调用")
+//    @Parameters({
+//            @Parameter(name = "grant_type", required = true, description = "授权类型", example = "code"),
+//            @Parameter(name = "code", description = "授权范围", example = "userinfo.read"),
+//            @Parameter(name = "redirect_uri", description = "重定向 URI", example = "https://www.iocoder.cn"),
+//            @Parameter(name = "state", description = "状态", example = "1"),
+//            @Parameter(name = "username", example = "tudou"),
+//            @Parameter(name = "password", example = "cai"), // 多个使用空格分隔
+//            @Parameter(name = "scope", example = "user_info user_write"),
+//            @Parameter(name = "refresh_token", example = "123424233"),
+//    })
+//    @OperateLog(enable = false) // 避免 Post 请求被记录操作日志
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "grant_type", value="授权类型",required = true, example = "authorization_code"),
+            @ApiImplicitParam(name = "code", value="授权码认证第一步获取的code",required = false, example = "1fa0225b70a94f43a5977dcc472787f0"),
+            @ApiImplicitParam(name = "redirect_uri", value="重定向URI",required = false, example = "http://127.0.0.1:18080/callback.html"),
+            @ApiImplicitParam(name = "state", value="状态",required = false, example = ""),
+            @ApiImplicitParam(name = "username", value="用户名",required = false, example = ""),
+            @ApiImplicitParam(name = "password", value="密码",required = false, example = ""),
+            @ApiImplicitParam(name = "scope", value="授权范围",required = false, example = ""),
+            @ApiImplicitParam(name = "refresh_token", value="刷新token",required = false, example = "123424233"),
+    })
+    @PostMapping("token")
+    @PermitAll
+    @ApiOperation(value = "获得访问令牌", notes = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【获取】调用" +
+            "1.授权码 authorization_code 模式: code redirectUri + state 2.密码 password 模式: username + password + scope参数" +
+            "3.刷新 refresh_token模式时： refreshToken参数  4. 客户端 client_credentials 模式：scope 参数 不支持 5. 简化 implicit 模式时：不支持 默认在header中传递clientId和clientSecret")
+    public CommonResult<OAuth2OpenAccessTokenRespVO> postAccessToken(HttpServletRequest request,
+                                                                     @RequestParam("grant_type") String grantType,
+                                                                     @RequestParam("code") String code,
+                                                                     @RequestParam(value = "redirect_uri", required = false) String redirectUri,
+                                                                     @RequestParam(value = "state", required = false) String state,
+                                                                     @RequestParam(value = "username", required = false) String username,
+                                                                     @RequestParam(value = "password", required = false) String password,
+                                                                     @RequestParam(value = "scope", required = false) String scope,
+                                                                     @RequestParam(value = "refresh_token", required = false) String refreshToken) {
+
+        List<String> scopes = OAuth2Utils.buildScopes(scope);
+
+        // 1.0 校验授权类型
+        OAuth2GrantTypeEnum grantTypeEnum = OAuth2GrantTypeEnum.getByGranType(grantType);
+        if (grantTypeEnum == null) {
+            throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.BAD_REQUEST, "未知授权类型");
+        }
+
+        if (grantTypeEnum != OAuth2GrantTypeEnum.AUTHORIZATION_CODE) {
+            throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.BAD_REQUEST, "只支持authorization_code模式");
+        }
+
+        // 1.1 校验客户端
+        List<String> clientIdAndSecret = obtainBasicAuthorization(request);
+        OAuth2ClientDO client = oAuth2ClientService.validOAuthClient(clientIdAndSecret.get(0), clientIdAndSecret.get(1), grantType, scopes, redirectUri);
+        OAuth2AccessTokenDO accessTokenDo = null;
+        switch (grantTypeEnum) {
+            case AUTHORIZATION_CODE:
+                accessTokenDo = oAuth2GrantService.grantAuthorizationCodeForAccessToken(client.getClientId(), code, redirectUri, state);
+                break;
+            default:
+                throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.BAD_REQUEST, "不支持的授权模式");
+
+        }
+
+
+        // 1.2 根据授权模式 获取访问令牌
+        return CommonResult.success(OAuth2OpenConvert.INSTANCE.convert(accessTokenDo));
+    }
+
 
     /**
      * 对应 Spring Security OAuth 的 AuthorizationEndpoint 类的 authorize 方法
@@ -92,12 +178,12 @@ public class OAuth2OpenController {
     @PostMapping("/authorize")
     @ApiOperation(value = "申请授权", notes = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【提交】调用")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="response_type", required=true, value="响应类型", example = "code"),
-            @ApiImplicitParam(name="client_id", required=true, value="客户端编号", example = "yudao-sso-demo-by-code"),
-            @ApiImplicitParam(name="scope", required=false, value="授权范围", example = "{\"user.read\":true,\"user.write\":false}"),
-            @ApiImplicitParam(name="redirect_uri", required=true, value="重定向 URI", example = "http://127.0.0.1:18080/callback.html"),
-            @ApiImplicitParam(name="auto_approve", required=true, value="是否自动授权", example = "false"),
-            @ApiImplicitParam(name="state", required=true, value="自定义标识,会远洋返回", example = "clientID1"),
+            @ApiImplicitParam(name = "response_type", required = true, value = "响应类型", example = "code"),
+            @ApiImplicitParam(name = "client_id", required = true, value = "客户端编号", example = "yudao-sso-demo-by-code"),
+            @ApiImplicitParam(name = "scope", required = false, value = "授权范围", example = "{\"user.read\":true,\"user.write\":false}"),
+            @ApiImplicitParam(name = "redirect_uri", required = true, value = "重定向 URI", example = "http://127.0.0.1:18080/callback.html"),
+            @ApiImplicitParam(name = "auto_approve", required = true, value = "是否自动授权", example = "false"),
+            @ApiImplicitParam(name = "state", required = true, value = "自定义标识,会远洋返回", example = "clientID1"),
     })
     public CommonResult<String> approveOrDeny(@RequestParam("response_type") String responseType,
                                               @RequestParam("client_id") String clientId,
@@ -143,6 +229,18 @@ public class OAuth2OpenController {
         // 2. 拼接重定向的url
         return OAuth2Utils.buildAuthorizationCodeRedirectUri(redirectUri, code, state);
     }
+
+    /**
+     * 从header中获取clientId和secret
+     */
+    private List<String> obtainBasicAuthorization(HttpServletRequest request) {
+        List<String> clientIdAndSecret = HttpUtils.obtainBasicAuthorization(request);
+        if (clientIdAndSecret == null) {
+            throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.BAD_REQUEST, "client_id 或 client_secret 未正确传递");
+        }
+        return clientIdAndSecret;
+    }
+
 
     private OAuth2GrantTypeEnum getGrantTypeEnum(String responseType) {
         if ("code".equals(responseType)) {

@@ -61,7 +61,7 @@ public class OAuth2AccessTokenDO extends BaseTenantDO {
     private String clientId;
     /**
      * 授权范围
-     */
+
     @TableField(typeHandler = JacksonTypeHandler.class)
     private List<String> scopes;
     /**
