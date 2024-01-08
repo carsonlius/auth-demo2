@@ -2,7 +2,9 @@ package com.carsonlius.framework.mybatis.config;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.incrementer.IKeyGenerator;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.baomidou.mybatisplus.extension.incrementer.*;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
@@ -12,6 +14,8 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.ConfigurableEnvironment;
+
+import com.baomidou.mybatisplus.autoconfigure.ConfigurationCustomizer;
 
 /**
  * MyBaits 配置类

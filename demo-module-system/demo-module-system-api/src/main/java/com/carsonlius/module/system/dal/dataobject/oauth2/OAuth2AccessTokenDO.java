@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.carsonlius.framework.mybatis.core.dataobject.BaseDO;
 import com.carsonlius.framework.mybatis.core.dataobject.BaseTenantDO;
+import com.carsonlius.framework.mybatis.core.handler.StringListTypeHandler;
+import com.carsonlius.framework.mybatis.core.handler.StringListTypeHandler2;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,10 +23,8 @@ import java.util.List;
  * 如下字段，暂时未使用，暂时不支持：
  * user_name、authentication（用户信息）
  *
- * @author 芋道源码
  */
 @TableName(value = "system_oauth2_access_token", autoResultMap = true)
-@KeySequence("system_oauth2_access_token_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
@@ -61,8 +61,9 @@ public class OAuth2AccessTokenDO extends BaseTenantDO {
     private String clientId;
     /**
      * 授权范围
-
-    @TableField(typeHandler = JacksonTypeHandler.class)
+     */
+    @TableField(typeHandler = StringListTypeHandler.class)
+//    @TableField(typeHandler = JacksonTypeHandler.class)
     private List<String> scopes;
     /**
      * 过期时间

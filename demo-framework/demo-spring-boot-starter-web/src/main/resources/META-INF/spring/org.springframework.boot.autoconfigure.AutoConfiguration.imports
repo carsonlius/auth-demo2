@@ -1,1 +1,2 @@
 com.carsonlius.framework.swagger.config.DemoSwaggerAutoConfiguration
+com.carsonlius.framework.jackson.config.DemoJacksonAutoConfiguration

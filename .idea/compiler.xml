@@ -18,8 +18,8 @@
         <module name="demo-common" />
         <module name="demo-spring-boot-starter-security" />
         <module name="demo-module-system-api" />
-        <module name="demo-spring-boot-starter-web" />
         <module name="demo-spring-boot-starter-mybatis" />
+        <module name="demo-spring-boot-starter-web" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

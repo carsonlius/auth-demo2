@@ -86,7 +86,7 @@ public class OAuth2OpenController {
             @ApiImplicitParam(name = "state", value="状态",required = false, example = ""),
             @ApiImplicitParam(name = "username", value="用户名",required = false, example = ""),
             @ApiImplicitParam(name = "password", value="密码",required = false, example = ""),
-            @ApiImplicitParam(name = "scope", value="授权范围",required = false, example = ""),
+            @ApiImplicitParam(name = "scope", value="授权范围",required = false, example = "user.read user.write"),
             @ApiImplicitParam(name = "refresh_token", value="刷新token",required = false, example = "123424233"),
     })
     @PostMapping("token")
