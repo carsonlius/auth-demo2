@@ -1,6 +1,7 @@
 package com.carsonlius.module.system.dal.mysql.oauth2;
 
 import com.carsonlius.framework.mybatis.core.mapper.BaseMapperX;
+import com.carsonlius.framework.mybatis.core.query.LambdaQueryWrapperX;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -16,6 +17,10 @@ public interface OAuth2AccessTokenMapper extends BaseMapperX<OAuth2AccessTokenDO
 
     default OAuth2AccessTokenDO selectByAccessToken(String accessToken) {
         return selectOne(OAuth2AccessTokenDO::getAccessToken, accessToken);
+    }
+
+    default Integer deleteByRefeshAccessToken(String refreshToken) {
+        return delete(new LambdaQueryWrapperX<OAuth2AccessTokenDO>().eq(OAuth2AccessTokenDO::getRefreshToken, refreshToken));
     }
 
 }

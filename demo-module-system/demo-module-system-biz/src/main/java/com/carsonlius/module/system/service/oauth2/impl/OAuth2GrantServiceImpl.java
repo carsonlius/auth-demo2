@@ -62,4 +62,9 @@ public class OAuth2GrantServiceImpl implements OAuth2GrantService {
         // 创建访问令牌
         return oAuth2TokenService.createAccessToken(codeDO.getUserId(), codeDO.getUserType(), codeDO.getClientId(), codeDO.getScopes());
     }
+
+    @Override
+    public OAuth2AccessTokenDO grantRefreshToken(String refreshToken, String clientId) {
+        return oAuth2TokenService.refreshAccessToken(refreshToken, clientId);
+    }
 }

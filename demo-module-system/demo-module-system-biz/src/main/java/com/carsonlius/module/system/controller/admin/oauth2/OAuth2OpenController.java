@@ -112,7 +112,7 @@ public class OAuth2OpenController {
             throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.BAD_REQUEST, "未知授权类型");
         }
 
-        if (grantTypeEnum != OAuth2GrantTypeEnum.AUTHORIZATION_CODE) {
+        if (!(grantTypeEnum == OAuth2GrantTypeEnum.AUTHORIZATION_CODE || grantTypeEnum == OAuth2GrantTypeEnum.REFRESH_TOKEN)) {
             throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.BAD_REQUEST, "只支持authorization_code模式");
         }
 
@@ -123,6 +123,9 @@ public class OAuth2OpenController {
         switch (grantTypeEnum) {
             case AUTHORIZATION_CODE:
                 accessTokenDo = oAuth2GrantService.grantAuthorizationCodeForAccessToken(client.getClientId(), code, redirectUri, state);
+                break;
+            case REFRESH_TOKEN:
+                accessTokenDo = oAuth2GrantService.grantRefreshToken(refreshToken,client.getClientId());
                 break;
             default:
                 throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.BAD_REQUEST, "不支持的授权模式");

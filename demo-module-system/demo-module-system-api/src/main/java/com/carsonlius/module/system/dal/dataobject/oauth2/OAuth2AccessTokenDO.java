@@ -1,18 +1,13 @@
 package com.carsonlius.module.system.dal.dataobject.oauth2;
 
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
-import com.carsonlius.framework.mybatis.core.dataobject.BaseDO;
 import com.carsonlius.framework.mybatis.core.dataobject.BaseTenantDO;
 import com.carsonlius.framework.mybatis.core.handler.StringListTypeHandler;
-import com.carsonlius.framework.mybatis.core.handler.StringListTypeHandler2;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import com.carsonlius.framework.common.enums.UserTypeEnum;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +23,9 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
+@Accessors(chain = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class OAuth2AccessTokenDO extends BaseTenantDO {
 
     /**
@@ -63,7 +61,6 @@ public class OAuth2AccessTokenDO extends BaseTenantDO {
      * 授权范围
      */
     @TableField(typeHandler = StringListTypeHandler.class)
-//    @TableField(typeHandler = JacksonTypeHandler.class)
     private List<String> scopes;
     /**
      * 过期时间

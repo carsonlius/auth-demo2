@@ -13,4 +13,11 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface OAuth2RefreshTokenMapper extends BaseMapperX<OAuth2RefreshTokenDO> {
+
+    /**
+     * 根据刷新令牌查询一条数据
+     * */
+    default OAuth2RefreshTokenDO selectByRefreshToken(String refreshToken) {
+        return selectOne(OAuth2RefreshTokenDO::getRefreshToken, refreshToken);
+    }
 }

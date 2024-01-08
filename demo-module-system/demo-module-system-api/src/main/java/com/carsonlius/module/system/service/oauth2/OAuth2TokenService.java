@@ -46,4 +46,13 @@ public interface OAuth2TokenService {
      * @return 访问令牌的信息
      */
     OAuth2AccessTokenDO getAccessToken(String accessToken);
+
+    /**
+     * 刷新访问令牌
+     * 参考 DefaultTokenServices 的 refreshAccessToken 方法
+     * @param refreshAccessToken 刷新令牌
+     * @param clientId 客户端编号
+     * @return 访问令牌的信息
+     * */
+    OAuth2AccessTokenDO refreshAccessToken(String refreshAccessToken, String clientId);
 }

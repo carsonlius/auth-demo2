@@ -1,6 +1,7 @@
 package com.carsonlius.framework.mybatis.core.dataobject;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * @version V1.0
@@ -10,6 +11,7 @@ import lombok.Data;
  * @description
  */
 @Data
+@Accessors(chain = true)
 public class BaseTenantDO extends BaseDO {
     /**
      * 多租户编号

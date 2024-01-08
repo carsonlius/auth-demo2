@@ -1,6 +1,8 @@
 package com.carsonlius.module.system.service.oauth2.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.carsonlius.framework.common.exception.ServiceException;
 import com.carsonlius.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.carsonlius.framework.common.exception.util.ServiceExceptionUtil;
@@ -17,6 +19,8 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,7 +32,7 @@ import static com.carsonlius.module.system.enums.ErrorCodeConstants.AUTH_TOKEN_E
  * @author: carsonlius
  * @date: 2023/12/20 13:53
  * @company
- * @description
+ * @description OAuth2.0 Token Service 实现类
  */
 @Slf4j
 @Service
@@ -46,7 +50,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     @Override
     public OAuth2AccessTokenDO createAccessToken(Long userId, Integer userType, String clientId, List<String> scopes) {
         // 获取client
-        OAuth2ClientDO client = oAuth2ClientService.validOAuthClient(clientId, null, null, null, null);
+        OAuth2ClientDO client = oAuth2ClientService.validOAuthClient(clientId);
 
         // 获取刷新token
         OAuth2RefreshTokenDO refreshToken = createOAuth2RefreshToken(userId, userType, client, scopes);
@@ -61,12 +65,12 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
 
         // 校验访问令牌不存在
         if (tokenDO == null) {
-            throw  ServiceExceptionUtil.exception(ErrorCodeConstants.AUTH_TOKEN_NOT_EXISTS);
+            throw ServiceExceptionUtil.exception(ErrorCodeConstants.AUTH_TOKEN_NOT_EXISTS);
         }
 
         //  校验访问另外过期
         if (DateUtils.isExpired(tokenDO.getExpiresTime())) {
-            throw  ServiceExceptionUtil.exception(ErrorCodeConstants.AUTH_TOKEN_EXPIRED);
+            throw ServiceExceptionUtil.exception(ErrorCodeConstants.AUTH_TOKEN_EXPIRED);
         }
 
         return tokenDO;
@@ -75,6 +79,52 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     @Override
     public OAuth2AccessTokenDO getAccessToken(String accessToken) {
         return tokenMapper.selectByAccessToken(accessToken);
+    }
+
+    @Override
+    @Transactional(noRollbackFor = {ServiceException.class})
+    public OAuth2AccessTokenDO refreshAccessToken(String refreshAccessToken, String clientId) {
+        // 查询刷新令牌
+        OAuth2RefreshTokenDO refreshTokenDO = oAuth2RefreshTokenMapper.selectByRefreshToken(refreshAccessToken);
+        if (refreshTokenDO == null) {
+            throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.BAD_REQUEST, "无效的刷新令牌");
+        }
+
+        // 校验客户端
+        OAuth2ClientDO clientDO = oAuth2ClientService.validOAuthClient(clientId);
+        if (ObjectUtil.notEqual(refreshTokenDO.getClientId(), clientDO.getClientId())) {
+            throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.BAD_REQUEST, "刷新令牌的客户端号不正确");
+        }
+
+        // 删除旧访问令牌
+        tokenMapper.deleteByRefeshAccessToken(refreshAccessToken);
+
+        //  是否过期, 过期删除刷新令牌
+        if (DateUtils.isExpired(refreshTokenDO.getExpiresTime())) {
+            oAuth2RefreshTokenMapper.deleteById(refreshTokenDO.getId());
+            throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.BAD_REQUEST, "刷新令牌已过期");
+        }
+
+        // 创建访问令牌
+        return refreshAccessToken(refreshTokenDO, clientDO);
+    }
+
+    /**
+     * 根据refreshDO和clientDO生成一条令牌
+     * */
+    private OAuth2AccessTokenDO refreshAccessToken(OAuth2RefreshTokenDO refreshTokenDO, OAuth2ClientDO clientDO) {
+        OAuth2AccessTokenDO tokenDO = new OAuth2AccessTokenDO()
+                .setAccessToken(createToken())
+                .setRefreshToken(refreshTokenDO.getRefreshToken())
+                .setUserId(refreshTokenDO.getUserId())
+                .setClientId(refreshTokenDO.getClientId())
+                .setExpiresTime(LocalDateTime.now().plusSeconds(clientDO.getAccessTokenValiditySeconds()))
+                .setUserType(refreshTokenDO.getUserType())
+                .setScopes(refreshTokenDO.getScopes())
+                ;
+        tokenDO.setCreateTime(LocalDateTime.now()).setUpdateTime(LocalDateTime.now());
+        tokenMapper.insert(tokenDO);
+        return tokenDO;
     }
 
     /**
