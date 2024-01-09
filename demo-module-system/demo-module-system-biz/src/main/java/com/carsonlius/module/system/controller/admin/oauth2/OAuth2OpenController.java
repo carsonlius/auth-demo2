@@ -11,6 +11,7 @@ import com.carsonlius.framework.common.util.json.JsonUtils;
 import com.carsonlius.framework.security.core.util.SecurityFrameworkUtils;
 import com.carsonlius.module.system.controller.admin.oauth2.vo.open.OAuth2OpenAccessTokenRespVO;
 import com.carsonlius.module.system.controller.admin.oauth2.vo.open.OAuth2OpenAuthorizeInfoRespVO;
+import com.carsonlius.module.system.controller.admin.oauth2.vo.open.OAuth2OpenCheckTokenRespVO;
 import com.carsonlius.module.system.convert.oauth2.OAuth2OpenConvert;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
@@ -19,6 +20,7 @@ import com.carsonlius.module.system.enums.oauth2.OAuth2GrantTypeEnum;
 import com.carsonlius.module.system.service.oauth2.OAuth2ApproveService;
 import com.carsonlius.module.system.service.oauth2.OAuth2ClientService;
 import com.carsonlius.module.system.service.oauth2.OAuth2GrantService;
+import com.carsonlius.module.system.service.oauth2.OAuth2TokenService;
 import com.carsonlius.module.system.util.OAuth2Utils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -56,6 +58,9 @@ public class OAuth2OpenController {
 
     @Autowired
     private OAuth2GrantService oAuth2GrantService;
+
+    @Autowired
+    private OAuth2TokenService oAuth2TokenService;
 
     /**
      * 对应 Spring Security OAuth 的 TokenEndpoint 类的 postAccessToken 方法
@@ -211,13 +216,30 @@ public class OAuth2OpenController {
     @DeleteMapping("/token")
     @ApiOperation(value = "删除访问令牌")
     @PermitAll
-    @ApiImplicitParams({@ApiImplicitParam(name = "token", required = true, value = "")})
+    @ApiImplicitParams({@ApiImplicitParam(name = "token", required = true, value = "访问令牌")})
     public CommonResult<Boolean> revokeToken(HttpServletRequest request, @RequestParam(value = "token") String token) {
         // 校验客户端
         List<String> clientIdAndSecret = obtainBasicAuthorization(request);
         OAuth2ClientDO clientDO = oAuth2ClientService.validOAuthClient(clientIdAndSecret.get(0), clientIdAndSecret.get(1), null, null, null);
 
         return CommonResult.success(oAuth2GrantService.revokeToken(clientDO.getClientId(), token));
+    }
+
+    @PostMapping("/check-token")
+    @PermitAll
+    @ApiOperation(value = "校验访问令牌")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "token", value = "访问令牌", required = true)
+    })
+    public CommonResult<OAuth2OpenCheckTokenRespVO> checkToken(HttpServletRequest request, @RequestParam(value = "token") String token) {
+        // 校验客户端
+        List<String> clientIdAndSecret = obtainBasicAuthorization(request);
+        oAuth2ClientService.validOAuthClient(clientIdAndSecret.get(0), clientIdAndSecret.get(1), null, null, null);
+
+        // 校验令牌
+        OAuth2AccessTokenDO tokenDO = oAuth2TokenService.checkAccessToken(token);
+
+        return CommonResult.success(OAuth2OpenConvert.INSTANCE.convert2(tokenDO));
     }
 
     /**

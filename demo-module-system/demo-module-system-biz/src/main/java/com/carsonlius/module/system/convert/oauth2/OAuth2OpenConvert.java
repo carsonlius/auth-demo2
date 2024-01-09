@@ -1,10 +1,13 @@
 package com.carsonlius.module.system.convert.oauth2;
 
+import cn.hutool.core.date.LocalDateTimeUtil;
 import com.carsonlius.framework.common.core.KeyValue;
+import com.carsonlius.framework.common.enums.UserTypeEnum;
 import com.carsonlius.framework.common.util.collection.CollectionUtils;
 import com.carsonlius.framework.security.core.util.SecurityFrameworkUtils;
 import com.carsonlius.module.system.controller.admin.oauth2.vo.open.OAuth2OpenAccessTokenRespVO;
 import com.carsonlius.module.system.controller.admin.oauth2.vo.open.OAuth2OpenAuthorizeInfoRespVO;
+import com.carsonlius.module.system.controller.admin.oauth2.vo.open.OAuth2OpenCheckTokenRespVO;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
@@ -47,6 +50,15 @@ public interface OAuth2OpenConvert {
         respVO.setTokenType(SecurityFrameworkUtils.AUTHORIZATION_BEARER.toLowerCase(Locale.ROOT));
         respVO.setScope(OAuth2Utils.buildScopeStr(token.getScopes()));
         respVO.setExpiresIn(OAuth2Utils.getExpiresIn(token.getExpiresTime()));
+        return respVO;
+    }
+
+    OAuth2OpenCheckTokenRespVO convert3(OAuth2AccessTokenDO bean);
+
+    default OAuth2OpenCheckTokenRespVO convert2(OAuth2AccessTokenDO tokenDO){
+        OAuth2OpenCheckTokenRespVO respVO = convert3(tokenDO);
+        respVO.setExp(LocalDateTimeUtil.toEpochMilli(tokenDO.getExpiresTime()) / 1000L);
+        respVO.setUserType(UserTypeEnum.ADMIN.getValue());
         return respVO;
     }
 }
