@@ -1,6 +1,5 @@
 package com.carsonlius.module.system.service.oauth2.impl;
 
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.carsonlius.framework.common.exception.ServiceException;
@@ -15,17 +14,14 @@ import com.carsonlius.module.system.dal.mysql.oauth2.OAuth2RefreshTokenMapper;
 import com.carsonlius.module.system.enums.ErrorCodeConstants;
 import com.carsonlius.module.system.service.oauth2.OAuth2ClientService;
 import com.carsonlius.module.system.service.oauth2.OAuth2TokenService;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.carsonlius.module.system.enums.ErrorCodeConstants.AUTH_TOKEN_EXPIRED;
 
 /**
  * @version V1.0
@@ -109,9 +105,31 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         return refreshAccessToken(refreshTokenDO, clientDO);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public OAuth2AccessTokenDO removeAccessToken(String accessToken) {
+        OAuth2AccessTokenDO accessTokenDO = tokenMapper.selectByAccessToken(accessToken);
+        return removeAccessToken(accessTokenDO);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public OAuth2AccessTokenDO removeAccessToken(OAuth2AccessTokenDO accessTokenDO) {
+        if (accessTokenDO == null) {
+            return null;
+        }
+
+        // 删除访问令牌
+        tokenMapper.deleteById(accessTokenDO.getId());
+
+        // 删除刷新令牌
+        oAuth2RefreshTokenMapper.deleteByRefreshToken(accessTokenDO.getRefreshToken());
+        return accessTokenDO;
+    }
+
     /**
      * 根据refreshDO和clientDO生成一条令牌
-     * */
+     */
     private OAuth2AccessTokenDO refreshAccessToken(OAuth2RefreshTokenDO refreshTokenDO, OAuth2ClientDO clientDO) {
         OAuth2AccessTokenDO tokenDO = new OAuth2AccessTokenDO()
                 .setAccessToken(createToken())
@@ -120,8 +138,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
                 .setClientId(refreshTokenDO.getClientId())
                 .setExpiresTime(LocalDateTime.now().plusSeconds(clientDO.getAccessTokenValiditySeconds()))
                 .setUserType(refreshTokenDO.getUserType())
-                .setScopes(refreshTokenDO.getScopes())
-                ;
+                .setScopes(refreshTokenDO.getScopes());
         tokenDO.setCreateTime(LocalDateTime.now()).setUpdateTime(LocalDateTime.now());
         tokenMapper.insert(tokenDO);
         return tokenDO;

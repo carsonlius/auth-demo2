@@ -65,29 +65,15 @@ public class OAuth2OpenController {
      * 客户端 client_credentials 模式：scope 参数 不支持
      * 简化 implicit 模式时：不支持
      */
-//    @PostMapping("/token")
-//    @PermitAll
-//    @Operation(summary = "获得访问令牌", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【获取】调用")
-//    @Parameters({
-//            @Parameter(name = "grant_type", required = true, description = "授权类型", example = "code"),
-//            @Parameter(name = "code", description = "授权范围", example = "userinfo.read"),
-//            @Parameter(name = "redirect_uri", description = "重定向 URI", example = "https://www.iocoder.cn"),
-//            @Parameter(name = "state", description = "状态", example = "1"),
-//            @Parameter(name = "username", example = "tudou"),
-//            @Parameter(name = "password", example = "cai"), // 多个使用空格分隔
-//            @Parameter(name = "scope", example = "user_info user_write"),
-//            @Parameter(name = "refresh_token", example = "123424233"),
-//    })
-//    @OperateLog(enable = false) // 避免 Post 请求被记录操作日志
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "grant_type", value="授权类型",required = true, example = "authorization_code"),
-            @ApiImplicitParam(name = "code", value="授权码认证第一步获取的code",required = false, example = "1fa0225b70a94f43a5977dcc472787f0"),
-            @ApiImplicitParam(name = "redirect_uri", value="重定向URI",required = false, example = "http://127.0.0.1:18080/callback.html"),
-            @ApiImplicitParam(name = "state", value="状态",required = false, example = ""),
-            @ApiImplicitParam(name = "username", value="用户名",required = false, example = ""),
-            @ApiImplicitParam(name = "password", value="密码",required = false, example = ""),
-            @ApiImplicitParam(name = "scope", value="授权范围",required = false, example = "user.read user.write"),
-            @ApiImplicitParam(name = "refresh_token", value="刷新token",required = false, example = "123424233"),
+            @ApiImplicitParam(name = "grant_type", value = "授权类型", required = true, example = "authorization_code"),
+            @ApiImplicitParam(name = "code", value = "授权码认证第一步获取的code", required = false, example = "1fa0225b70a94f43a5977dcc472787f0"),
+            @ApiImplicitParam(name = "redirect_uri", value = "重定向URI", required = false, example = "http://127.0.0.1:18080/callback.html"),
+            @ApiImplicitParam(name = "state", value = "状态", required = false, example = ""),
+            @ApiImplicitParam(name = "username", value = "用户名", required = false, example = ""),
+            @ApiImplicitParam(name = "password", value = "密码", required = false, example = ""),
+            @ApiImplicitParam(name = "scope", value = "授权范围", required = false, example = "user.read user.write"),
+            @ApiImplicitParam(name = "refresh_token", value = "刷新token", required = false, example = "123424233"),
     })
     @PostMapping("token")
     @PermitAll
@@ -125,7 +111,7 @@ public class OAuth2OpenController {
                 accessTokenDo = oAuth2GrantService.grantAuthorizationCodeForAccessToken(client.getClientId(), code, redirectUri, state);
                 break;
             case REFRESH_TOKEN:
-                accessTokenDo = oAuth2GrantService.grantRefreshToken(refreshToken,client.getClientId());
+                accessTokenDo = oAuth2GrantService.grantRefreshToken(refreshToken, client.getClientId());
                 break;
             default:
                 throw ServiceExceptionUtil.exception(GlobalErrorCodeConstants.BAD_REQUEST, "不支持的授权模式");
@@ -220,6 +206,18 @@ public class OAuth2OpenController {
         List<String> approveScopes = CollectionUtils.convertList(scopes.entrySet(), Map.Entry::getKey, Map.Entry::getValue);
 
         return CommonResult.success(getAuthorizationCodeRedirect(SecurityFrameworkUtils.getLoginUserId(), client, approveScopes, redirectUri, state));
+    }
+
+    @DeleteMapping("/token")
+    @ApiOperation(value = "删除访问令牌")
+    @PermitAll
+    @ApiImplicitParams({@ApiImplicitParam(name = "token", required = true, value = "")})
+    public CommonResult<Boolean> revokeToken(HttpServletRequest request, @RequestParam(value = "token") String token) {
+        // 校验客户端
+        List<String> clientIdAndSecret = obtainBasicAuthorization(request);
+        OAuth2ClientDO clientDO = oAuth2ClientService.validOAuthClient(clientIdAndSecret.get(0), clientIdAndSecret.get(1), null, null, null);
+
+        return CommonResult.success(oAuth2GrantService.revokeToken(clientDO.getClientId(), token));
     }
 
     /**

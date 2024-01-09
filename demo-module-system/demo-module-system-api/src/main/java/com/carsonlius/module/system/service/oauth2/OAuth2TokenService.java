@@ -55,4 +55,22 @@ public interface OAuth2TokenService {
      * @return 访问令牌的信息
      * */
     OAuth2AccessTokenDO refreshAccessToken(String refreshAccessToken, String clientId);
+
+    /**
+     * 删除访问令牌
+     * 参考 DefaultTokenServices 的 revokeToken 方法
+     *
+     * @param accessToken 刷新令牌
+     * @return 访问令牌的信息
+     * */
+    OAuth2AccessTokenDO removeAccessToken(String accessToken);
+
+    /**
+     * 删除访问令牌
+     * 参考 DefaultTokenServices 的 revokeToken 方法
+     *
+     * @param accessTokenDO 刷新令牌
+     * @return 访问令牌的信息
+     * */
+    OAuth2AccessTokenDO removeAccessToken(OAuth2AccessTokenDO accessTokenDO);
 }

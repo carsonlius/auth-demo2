@@ -44,4 +44,13 @@ public interface OAuth2GrantService {
      * 对应 Spring Security OAuth2 的 ResourceOwnerPasswordTokenGranter 功能
      * */
     OAuth2AccessTokenDO grantRefreshToken(String refreshToken, String clientId);
+
+    /**
+     * 删除访问令牌
+     * 对应 Spring Security OAuth2 的 ConsumerTokenServices 的 revokeToken 方法
+     * @param clientId
+     * @param token
+     * @return 删除是否成功
+     * */
+    boolean revokeToken(String clientId, String token);
 }

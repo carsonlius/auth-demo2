@@ -1,5 +1,6 @@
 package com.carsonlius.module.system.service.oauth2.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.carsonlius.framework.common.exception.util.ServiceExceptionUtil;
 import com.carsonlius.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
@@ -66,5 +67,22 @@ public class OAuth2GrantServiceImpl implements OAuth2GrantService {
     @Override
     public OAuth2AccessTokenDO grantRefreshToken(String refreshToken, String clientId) {
         return oAuth2TokenService.refreshAccessToken(refreshToken, clientId);
+    }
+
+    @Override
+    public boolean revokeToken(String clientId, String token) {
+        //  查询token
+        OAuth2AccessTokenDO tokenDO = oAuth2TokenService.getAccessToken(token);
+
+        //  clientId是否匹配
+        if (tokenDO == null) {
+            throw ServiceExceptionUtil.exception(ErrorCodeConstants.AUTH_TOKEN_NOT_EXISTS);
+        }
+
+        if (ObjectUtil.notEqual(tokenDO.getClientId(), clientId)) {
+            throw ServiceExceptionUtil.exception(ErrorCodeConstants.AUTH_TOKEN_NOT_EXISTS);
+        }
+
+        return oAuth2TokenService.removeAccessToken(tokenDO) != null;
     }
 }
